@@ -30,40 +30,50 @@ Once registered with your MCP client, you can ask things like:
 
 ## Setup
 
+### 1. Clone and install
+
 ```bash
 git clone https://github.com/twilewski/mcp_usercom.git
 cd mcp_usercom
 npm install
 ```
 
-You need two environment variables:
+### 2. Configure your credentials in `.env`
 
-- `USERCOM_SUBDOMAIN` — the prefix of your workspace URL. If you log in at `https://acme.user.com`, this is `acme`.
-- `USERCOM_TOKEN` — the 64-character API token from the panel.
+Create a local `.env` file (it will not be committed — it's in `.gitignore`):
+
+```bash
+cp .env.example .env
+```
+
+Then open `.env` in your editor and fill in:
+
+- `USERCOM_SUBDOMAIN` — the prefix of your workspace URL. If you log in at `https://acme.user.com`, set this to `acme`.
+- `USERCOM_TOKEN` — the 64-character API token (Panel → Settings → Workspace settings → API & Integrations → Public API).
 
 Optional:
 
 - `USERCOM_THROTTLE_MS` — minimum gap between API requests (default `150` ms ≈ 6 req/s). user.com's public docs say 10 req/s, but sustained bursts sometimes trip a short auth-rejection window; the default is conservative.
 
-Verify it boots:
+The MCP server loads `.env` automatically from the project root, regardless of which directory your MCP client launches it from.
+
+### 3. Verify it boots
 
 ```bash
-USERCOM_SUBDOMAIN=your-subdomain USERCOM_TOKEN=your-token npm start
+npm start
 # expected on stderr: "usercom-crm MCP ready (subdomain=...)"
 # Ctrl+C to stop.
 ```
 
 ## Registering the MCP server
 
-### Claude Code (CLI)
+> Because credentials are read from `.env`, the registration commands below **do not include the token** — it stays only on your local disk in the project folder.
 
-Recommended — use the official command:
+### Claude Code (CLI)
 
 ```bash
 claude mcp add usercom-crm \
   --scope user \
-  -e USERCOM_SUBDOMAIN=your-subdomain \
-  -e USERCOM_TOKEN=your-token \
   -- /absolute/path/to/mcp_usercom/node_modules/.bin/tsx \
      /absolute/path/to/mcp_usercom/src/index.ts
 
@@ -82,11 +92,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
   "mcpServers": {
     "usercom-crm": {
       "command": "/absolute/path/to/mcp_usercom/node_modules/.bin/tsx",
-      "args": ["/absolute/path/to/mcp_usercom/src/index.ts"],
-      "env": {
-        "USERCOM_SUBDOMAIN": "your-subdomain",
-        "USERCOM_TOKEN": "your-token"
-      }
+      "args": ["/absolute/path/to/mcp_usercom/src/index.ts"]
     }
   }
 }
@@ -96,7 +102,22 @@ Restart Claude Desktop.
 
 ### Other MCP clients
 
-Anything that supports the stdio MCP transport will work. Point it at the same `tsx src/index.ts` command with the two required environment variables.
+Anything that supports the stdio MCP transport will work. Point it at the same `tsx src/index.ts` command — credentials come from `.env`.
+
+### Overriding credentials per launch (optional)
+
+If you need to override `.env` for a single launch (e.g. multiple workspaces), environment variables set on the process still take precedence over `.env`. For Claude Code:
+
+```bash
+claude mcp add usercom-crm \
+  --scope user \
+  -e USERCOM_SUBDOMAIN=other-workspace \
+  -e USERCOM_TOKEN=other-token \
+  -- /absolute/path/to/mcp_usercom/node_modules/.bin/tsx \
+     /absolute/path/to/mcp_usercom/src/index.ts
+```
+
+Be aware that `-e` writes the token into `~/.claude.json` and exposes it in `ps` output. The `.env` approach is preferred.
 
 ## Tool reference
 
@@ -165,6 +186,8 @@ Should print the 15 tools registered.
 - **Never commit your `USERCOM_TOKEN`.** The included `.gitignore` excludes `.env`, `.claude/`, and other common secret locations, but always double-check before pushing.
 - A user.com Public API token gives **read/write access to your entire workspace**. Treat it like a password.
 - All tools in this server are read-only (GET endpoints only), but the token itself can do more — if it leaks, rotate it immediately in the panel.
+- **Prefer `.env` over `-e` in `claude mcp add`.** Tokens passed via `-e` are written into `~/.claude.json` and exposed in `ps` output on the machine. `.env` stays on disk with the file permissions you set on it.
+- On a shared machine, `chmod 600 .env` so only your user can read it.
 
 ## Contributing
 

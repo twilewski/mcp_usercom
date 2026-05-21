@@ -1,7 +1,17 @@
 #!/usr/bin/env node
+import { config as loadEnv } from "dotenv";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+
+// Load .env from the project root (one level up from src/), so the token can live
+// in a local file instead of being passed via `claude mcp add -e ...` (which leaks
+// it into ~/.claude.json and into `ps` argv). Existing process env wins — explicit
+// -e on the CLI still works as an override.
+const HERE = dirname(fileURLToPath(import.meta.url));
+loadEnv({ path: join(HERE, "..", ".env"), quiet: true });
 
 const SUBDOMAIN = process.env.USERCOM_SUBDOMAIN;
 const TOKEN = process.env.USERCOM_TOKEN;
