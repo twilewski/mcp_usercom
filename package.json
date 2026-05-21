@@ -1,0 +1,44 @@
+{
+  "name": "mcp-usercom",
+  "version": "0.1.0",
+  "description": "Unofficial Model Context Protocol (MCP) server exposing the user.com CRM REST API as read-only analytics tools for Claude and other MCP-compatible clients.",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "user.com",
+    "usercom",
+    "crm",
+    "claude",
+    "anthropic",
+    "sales-analytics"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/twilewski/mcp_usercom.git"
+  },
+  "bugs": {
+    "url": "https://github.com/twilewski/mcp_usercom/issues"
+  },
+  "homepage": "https://github.com/twilewski/mcp_usercom#readme",
+  "bin": {
+    "mcp-usercom": "src/index.ts"
+  },
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "@types/node": "^22.10.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

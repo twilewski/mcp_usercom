@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Local config (may contain secrets)
+.claude/
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+dist/
+*.tsbuildinfo
+
+# Logs and OS files
+*.log
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Test/temp data
+/tmp/
+*.dump.json
